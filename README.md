@@ -2,19 +2,24 @@
 _just for fun_
   
   
-__C# script-like__
--- One project per day
--- One file
--- No libs
+__C# script-like__  
+ \- one project per day  
+ \- one cs file  
+ \- no libs  
+
+<br/>
   
-  
-##### Day13
+###### Day13
 [Cramer rule](https://en.wikipedia.org/wiki/Cramer%27s_rule)
+<br/>
+<br/>
 
-##### Day21
-Why is <v faster than v< ??!
+###### Day21
+Why is <v faster than v< ??!  
 Took me days to figure how to correctly implement the memoization... damn robots... not gonna forget.
+<br/>
+<br/>
 
-##### Day24
+###### Day24
 [Full adder](https://en.wikipedia.org/wiki/Adder_(electronics)/)
 
