@@ -103,7 +103,7 @@ int P2(bool console) {
 }
 
 Console.WriteLine(P1(100));
-Console.WriteLine(P2(console: true));
+Console.WriteLine(P2(console: false));
 
 file record struct Position(int X, int Y);
 file record Robot(Position P, int Vx, int Vy) {
