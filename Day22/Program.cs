@@ -51,13 +51,13 @@ long Finaly(long secret)
             if (digit == 0)
                 continue;
 
-            var firstKey = new Key(changes[0], changes[1], changes[2], changes[3], baseSecret);
+            var firstKey = new Key(baseSecret, changes[0], changes[1], changes[2], changes[3]);
 
             // changes have already been registered for that secret
             if (keysDic.TryGetValue(firstKey, out var secondKey))
                 continue;
 
-            secondKey = new Key(changes[0], changes[1], changes[2], changes[3]);
+            secondKey = firstKey with { Secret = 0 };
 
             keysDic[firstKey] = secondKey;
 
@@ -78,4 +78,4 @@ var (p1, p2) = Exec();
 Console.WriteLine(p1);
 Console.WriteLine(p2);
 
-record struct Key(short A, short B, short C, short D, long Secret = 0);
+record struct Key(long Secret, short A, short B, short C, short D);
