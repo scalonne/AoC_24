@@ -1,4 +1,6 @@
-﻿var Secrets = File.ReadLines("input.txt")
+﻿using System.Diagnostics;
+
+var Secrets = File.ReadLines("input.txt")
                   .Select(Int64.Parse)
                   .ToList();
 
@@ -18,48 +20,56 @@ long Finaly(long secret)
     => Prune(Mix(secret * 2_048, secret));
 
 (long, long) Exec() {
-    var bananasDic = new Dictionary<(long a, long b, long c, long d), Dictionary<long, long>>();
-    var changes = new long[4];
-    var digits = new long[2_000 + 1];
+    var bananasDic = new Dictionary<Key, long>();
+    var keysDic = new Dictionary<Key, Key>();
+    var changes = new short[4];
+    var digits = new short[2_000 + 1];
     var secretCache = new Dictionary<long, long>();
     var p1 = 0L;
 
     foreach (var baseSecret in Secrets) {
+        digits[0] = (short)(baseSecret % 10);
+
         var nextSecret = baseSecret;
 
-        digits[0] = nextSecret % 10;
-
-        foreach (var i in Enumerable.Range(0, 2_000)) {
-            if (!secretCache.ContainsKey(nextSecret)) {
-                secretCache[nextSecret] = Finaly(Divide(Multiply(nextSecret)));
+        for (var i = 0; i < 2_000; i++) {
+            if (!secretCache.TryGetValue(nextSecret, out long secret)) {
+                secretCache[nextSecret] = secret = Finaly(Divide(Multiply(nextSecret)));
             }
 
-            nextSecret = secretCache[nextSecret];
+            nextSecret = secret;
 
-            var digit = nextSecret % 10;
+            var digit = (short)(nextSecret % 10);
 
             changes[0] = changes[1];
             changes[1] = changes[2];
             changes[2] = changes[3];
-            changes[3] = digit - digits[i];
+            changes[3] = (short)(digit - digits[i]);
 
             digits[i + 1] = digit;
 
-            var key = (changes[0], changes[1], changes[2], changes[3]);
+            if (digit == 0)
+                continue;
 
-            if (!bananasDic.ContainsKey(key))
-                bananasDic[key] = [];
+            var firstKey = new Key(changes[0], changes[1], changes[2], changes[3], baseSecret);
 
-            if (!bananasDic[key].ContainsKey(baseSecret))
-                bananasDic[key][baseSecret] = digit;
+            // changes have already been registered for that secret
+            if (keysDic.TryGetValue(firstKey, out var secondKey))
+                continue;
+
+            secondKey = new Key(changes[0], changes[1], changes[2], changes[3]);
+
+            keysDic[firstKey] = secondKey;
+
+            bananasDic.TryGetValue(secondKey, out var d);
+            bananasDic[secondKey] = d + digit;
         }
 
         p1 += nextSecret;
     }
 
-    var p2 = bananasDic.Values.Select(o => o.Values.Sum())
-                              .Max();
-
+    var p2 = bananasDic.Values.Max();
+    
     return (p1, p2);
 }
 
@@ -67,3 +77,5 @@ var (p1, p2) = Exec();
 
 Console.WriteLine(p1);
 Console.WriteLine(p2);
+
+record struct Key(short A, short B, short C, short D, long Secret = 0);
