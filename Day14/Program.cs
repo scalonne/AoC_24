@@ -60,10 +60,10 @@ int P2(bool console) {
     while (max-- > 0) {
         posDic.Clear();
 
-        foreach (var idx in Enumerable.Range(0, movingRobots.Count)) {
-            var robot = movingRobots[idx];
+        for (var i = 0; i < movingRobots.Count; i++) {
+            var robot = movingRobots[i];
 
-            robot = movingRobots[idx] = Move(movingRobots[idx]);
+            robot = movingRobots[i] = Move(movingRobots[i]);
 
             posDic.TryGetValue(robot.P, out var count);
             posDic[robot.P] = count + 1;
@@ -77,7 +77,7 @@ int P2(bool console) {
                 Console.Write(c);
             }
 
-            foreach (var i in Enumerable.Range(0, movingRobots.Count)) {
+            for (var i = 0; i < movingRobots.Count; i++) {
                 if (consoleRobots.TryGetValue(i, out var robot) && !posDic.ContainsKey(robot.P))
                     print(robot.P, ' ');
             
