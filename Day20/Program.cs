@@ -1,4 +1,7 @@
-﻿var Map = File.ReadLines("input.txt")
+﻿using System.Diagnostics;
+using static System.Net.Mime.MediaTypeNames;
+
+var Map = File.ReadLines("input.txt")
               .Select((l, y) => l.Select((c, x) => (x, y, c))
                                  .ToArray())
               .ToArray();
@@ -10,30 +13,40 @@ var End = Map.SelectMany(o => o)
              .First(o => o.c == 'E');
 
 Dictionary<(int x, int y), int> GetDistanceByPosition() {
-    var directions = new (int dx, int dy)[] {
-        (0, 1),
+    var allDirections = new (int dx, int dy)[] {
         (0, -1),
+        (0, 1),
+        (-1 , 0),
         (1, 0),
-        (-1 , 0)
     };
-    var pos = (Start.x, Start.y);
-    var end = (End.x, End.y);
-    var prev = pos;
+    var verticalDirections = allDirections.Where(o => o.dy != 0).ToArray();
+    var horizontalDirections = allDirections.Where(o => o.dx != 0).ToArray();
     var distanceByPosition = new Dictionary<(int, int), int>();
     var length = 0;
+    var directions = allDirections;
+    var px = Start.x;
+    var py = Start.y;
 
-    distanceByPosition[pos] = length++;
+    distanceByPosition[(px, py)] = length++;
 
-    while (pos != end) {
+    while (px != End.x || py != End.y) {
         foreach (var (dx, dy) in directions) {
-            var next = (x: pos.x + dx, y: pos.y + dy);
+            var x = px + dx;
+            var y = py + dy;
 
-            if (Map[next.y][next.x].c == '#' || next == prev)
+            if (Map[y][x].c == '#')
                 continue;
 
-            distanceByPosition[next] = length++;
-            prev = pos;
-            pos = next;
+            while (Map[y][x].c != '#') {
+                distanceByPosition[(x, y)] = length++;
+                x += dx;
+                y += dy;
+            }
+
+            px = x - dx;
+            py = y - dy;
+            directions = dx != 0 ? verticalDirections : horizontalDirections;
+            break;
         }
     }
 
@@ -42,46 +55,33 @@ Dictionary<(int x, int y), int> GetDistanceByPosition() {
 
 int Cheat(Dictionary<(int x, int y), int> distanceByPosition, int cheatDistance, int minCheatTime) {
     var cheatDic = new Dictionary<int, int>();
+    var positions = new Queue<(int x, int y)>(distanceByPosition.Keys.OrderBy(o => distanceByPosition[o]));
+    var positionsSet = positions.ToHashSet();
+    var res = 0;
+    
+    while (positions.TryDequeue(out var pos)) {
+        var d1 = distanceByPosition[pos];
+        var cheatCandidates = getCellArea(pos, cheatDistance).Where(positionsSet.Contains);
 
-    foreach (var pos in distanceByPosition.Keys) {
-        var posDistance = distanceByPosition[pos];
-        var area = getCellArea(pos, cheatDistance);
-        var nexts = area.Where(o => distanceByPosition.ContainsKey(o) && distanceByPosition[o] > posDistance)
-                        .ToList();
+        foreach (var next in cheatCandidates) {
+            var d = Math.Abs(next.x - pos.x) + Math.Abs(next.y - pos.y);
+            var d2 = distanceByPosition[next];
 
-        foreach (var next in nexts) {
-            var d1 = distanceByPosition[next] - posDistance;
-            var d2 = Math.Abs(next.x - pos.x) + Math.Abs(next.y - pos.y);
-
-            if (d1 > d2) {
-                var key = d1 - d2;
-
-                if (!cheatDic.ContainsKey(key))
-                    cheatDic[key] = 0;
-
-                cheatDic[key]++;
-            }
+            if (d2 - (d1 + d) >= minCheatTime)
+                res++;
         }
     }
 
-    return cheatDic.Where(o => o.Key >= minCheatTime)
-                   .Sum(o => o.Value);
+    return res;
 
-    HashSet<(int x, int y)> getCellArea((int x, int y) pos, int distance) {
-        var area = new HashSet<(int, int)>();
-
+    IEnumerable<(int x, int y)> getCellArea((int x, int y) pos, int distance) {
         foreach (var dy in Enumerable.Range(-distance, distance * 2 + 1)) {
             var y = pos.y + dy;
             var xRange = distance - Math.Abs(dy);
- 
-            foreach (var dx in Enumerable.Range(-xRange, xRange * 2 + 1)) {
-                var x = pos.x + dx;
 
-                area.Add((x, y));
-            }
+            foreach (var dx in Enumerable.Range(-xRange, xRange * 2 + 1))
+                yield return (pos.x + dx, y);
         }
-
-        return area;
     }
 }
 
