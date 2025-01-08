@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-var Secrets = File.ReadLines("input.txt")
+﻿var Secrets = File.ReadLines("input.txt")
                   .Select(Int64.Parse)
                   .ToList();
 

@@ -1,7 +1,4 @@
-﻿using System.Diagnostics;
-using static System.Net.Mime.MediaTypeNames;
-
-var Map = File.ReadLines("input.txt")
+﻿var Map = File.ReadLines("input.txt")
               .Select((l, y) => l.Select((c, x) => (x, y, c))
                                  .ToArray())
               .ToArray();
