@@ -21,5 +21,13 @@ foreach (var i in Enumerable.Range(1, 25)) {
     process.Start();
     process.WaitForExit();
     sw.Stop();
-    Console.WriteLine($"{day}: {sw.ElapsedMilliseconds}ms");
+
+    Console.Write($"{day}: ");
+    Console.ForegroundColor = sw.ElapsedMilliseconds switch {
+        >= 800 => ConsoleColor.Red,
+        >= 450 => ConsoleColor.Yellow,
+        _ => ConsoleColor.Green
+    };
+    Console.WriteLine($"{sw.ElapsedMilliseconds}ms");
+    Console.ForegroundColor = ConsoleColor.White;
 }
