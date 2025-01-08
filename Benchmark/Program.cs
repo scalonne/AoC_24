@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 
 var RootDirectory = @$"{Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}\devs\AoC_24\";
+var Retry = 3;
 
 foreach (var i in Enumerable.Range(1, 25)) {
     var day = $"Day{i:0#}";
@@ -15,19 +16,26 @@ foreach (var i in Enumerable.Range(1, 25)) {
             CreateNoWindow = true
         }
     };
-    var sw = new Stopwatch();
+    var min = Int64.MaxValue;
 
-    sw.Start();
-    process.Start();
-    process.WaitForExit();
-    sw.Stop();
+    foreach (var _ in Enumerable.Range(0, Retry)) {
+        var sw = new Stopwatch();
+
+        sw.Start();
+        process.Start();
+        process.WaitForExit();
+        sw.Stop();
+
+        if (sw.ElapsedMilliseconds < min)
+            min = sw.ElapsedMilliseconds;
+    }
 
     Console.Write($"{day}: ");
-    Console.ForegroundColor = sw.ElapsedMilliseconds switch {
+    Console.ForegroundColor = min switch {
         >= 800 => ConsoleColor.Red,
         >= 450 => ConsoleColor.Yellow,
         _ => ConsoleColor.Green
     };
-    Console.WriteLine($"{sw.ElapsedMilliseconds}ms");
+    Console.WriteLine($"{min}ms");
     Console.ForegroundColor = ConsoleColor.White;
 }
